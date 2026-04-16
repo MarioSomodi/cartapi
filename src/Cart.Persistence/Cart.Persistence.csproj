@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\Cart.Application\Cart.Application.csproj" />
+    <ProjectReference Include="..\Cart.Domain\Cart.Domain.csproj" />
+  </ItemGroup>
+</Project>
