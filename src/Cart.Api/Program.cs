@@ -3,7 +3,7 @@ using Cart.Api.Configuration;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddApiVersioningSupport();
             builder.Services.AddOpenApi();
 builder.Services.AddCartHealthChecks();
 
