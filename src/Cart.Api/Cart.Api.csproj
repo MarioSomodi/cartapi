@@ -7,5 +7,6 @@
   <ItemGroup>
     <PackageReference Include="Asp.Versioning.Mvc" />
     <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" />
+    <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
 </Project>
