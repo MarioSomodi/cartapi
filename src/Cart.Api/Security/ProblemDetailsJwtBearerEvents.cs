@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using Cart.Api.Middleware;
 using Cart.Application.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -26,7 +28,13 @@ public sealed class ProblemDetailsJwtBearerEvents(IProblemDetailsService problem
         };
 
         problemDetails.Extensions["code"] = ApplicationErrors.Auth.Unauthenticated.Code;
-        problemDetails.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
+        problemDetails.Extensions["traceId"] = Activity.Current?.TraceId.ToString() ?? context.HttpContext.TraceIdentifier;
+
+        string? correlationId = context.HttpContext.GetCorrelationId();
+        if (!string.IsNullOrWhiteSpace(correlationId))
+        {
+            problemDetails.Extensions["correlationId"] = correlationId;
+        }
 
         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
 

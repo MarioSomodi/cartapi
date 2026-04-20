@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using Cart.Api.Middleware;
 using Cart.Application.Shared;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,7 +23,13 @@ internal static class ControllerBaseExtensions
         };
 
         problemDetails.Extensions["code"] = error.Code;
-        problemDetails.Extensions["traceId"] = controller.HttpContext.TraceIdentifier;
+        problemDetails.Extensions["traceId"] = Activity.Current?.TraceId.ToString() ?? controller.HttpContext.TraceIdentifier;
+
+        string? correlationId = controller.HttpContext.GetCorrelationId();
+        if (!string.IsNullOrWhiteSpace(correlationId))
+        {
+            problemDetails.Extensions["correlationId"] = correlationId;
+        }
 
         return new ObjectResult(problemDetails)
         {
@@ -35,7 +43,7 @@ internal static class ControllerBaseExtensions
             "validation.failed" => StatusCodes.Status400BadRequest,
             "auth.unauthenticated" or "auth.missing_subject_id" or "auth.missing_tenant_id" => StatusCodes.Status401Unauthorized,
             "carts.not_found" or "carts.item_not_found" => StatusCodes.Status404NotFound,
-            "concurrency.conflict" => StatusCodes.Status409Conflict,
+            "concurrency.conflict" or "carts.item_snapshot_mismatch" => StatusCodes.Status409Conflict,
             _ => StatusCodes.Status400BadRequest
         };
 

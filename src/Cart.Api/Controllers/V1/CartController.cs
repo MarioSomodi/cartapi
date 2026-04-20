@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using Cart.Api.Contracts.Carts;
+using Cart.Api.Middleware;
 using Cart.Application.Carts.AddCartItem;
 using Cart.Application.Carts.ClearCart;
 using Cart.Application.Carts.CreateCart;
@@ -28,7 +29,11 @@ public sealed class CartController(IMediator mediator) : ControllerBase
         Result<CartDto> result = await mediator.Send(new CreateCartCommand(), cancellationToken);
 
         return result.Match(
-            success => Ok(success.ToResponse()),
+            success =>
+            {
+                HttpContext.SetCartId(success.Id);
+                return Ok(success.ToResponse());
+            },
             failure => this.ToProblemDetails(failure));
     }
 
@@ -41,7 +46,11 @@ public sealed class CartController(IMediator mediator) : ControllerBase
         Result<CartDto> result = await mediator.Send(new GetCartQuery(), cancellationToken);
 
         return result.Match(
-            success => Ok(success.ToResponse()),
+            success =>
+            {
+                HttpContext.SetCartId(success.Id);
+                return Ok(success.ToResponse());
+            },
             failure => this.ToProblemDetails(failure));
     }
 
@@ -49,6 +58,7 @@ public sealed class CartController(IMediator mediator) : ControllerBase
     [ProducesResponseType<CartResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<CartResponse>> AddItemAsync(
         [FromBody] AddCartItemRequest request,
         CancellationToken cancellationToken)
@@ -57,7 +67,11 @@ public sealed class CartController(IMediator mediator) : ControllerBase
         Result<CartDto> result = await mediator.Send(command, cancellationToken);
 
         return result.Match(
-            success => Ok(success.ToResponse()),
+            success =>
+            {
+                HttpContext.SetCartId(success.Id);
+                return Ok(success.ToResponse());
+            },
             failure => this.ToProblemDetails(failure));
     }
 
@@ -75,7 +89,11 @@ public sealed class CartController(IMediator mediator) : ControllerBase
         Result<CartDto> result = await mediator.Send(command, cancellationToken);
 
         return result.Match(
-            success => Ok(success.ToResponse()),
+            success =>
+            {
+                HttpContext.SetCartId(success.Id);
+                return Ok(success.ToResponse());
+            },
             failure => this.ToProblemDetails(failure));
     }
 
@@ -89,7 +107,11 @@ public sealed class CartController(IMediator mediator) : ControllerBase
         Result<CartDto> result = await mediator.Send(new RemoveCartItemCommand(itemId), cancellationToken);
 
         return result.Match(
-            success => Ok(success.ToResponse()),
+            success =>
+            {
+                HttpContext.SetCartId(success.Id);
+                return Ok(success.ToResponse());
+            },
             failure => this.ToProblemDetails(failure));
     }
 
@@ -102,7 +124,11 @@ public sealed class CartController(IMediator mediator) : ControllerBase
         Result<CartDto> result = await mediator.Send(new ClearCartCommand(), cancellationToken);
 
         return result.Match(
-            success => Ok(success.ToResponse()),
+            success =>
+            {
+                HttpContext.SetCartId(success.Id);
+                return Ok(success.ToResponse());
+            },
             failure => this.ToProblemDetails(failure));
     }
 }

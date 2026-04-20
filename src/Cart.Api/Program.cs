@@ -7,15 +7,18 @@ using Cart.Persistence;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+builder.AddSerilogLogging();
+
 builder.Services.AddProblemDetailsSupport();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddControllers();
 builder.Services.AddApiVersioningSupport();
 builder.Services.AddApplication();
-builder.Services.AddJwtAuthentication();
+builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IRequestContext, HttpRequestContext>();
+builder.Services.AddOpenTelemetrySupport(builder.Configuration, builder.Environment);
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddSwaggerDocumentation();
 builder.Services.AddCartHealthChecks();
@@ -28,10 +31,12 @@ if (app.Environment.IsDevelopment() && app.Configuration.GetValue("Database:Appl
 }
 
 app.UseSwaggerDocumentation();
+app.UseCorrelationId();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseHttpsRedirection();
 app.UseAuthentication();
+app.UseRequestContextLogging();
 app.UseAuthorization();
 app.MapControllers();
 

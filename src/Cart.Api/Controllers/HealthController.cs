@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -5,6 +6,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 namespace Cart.Api.Controllers;
 
 [ApiController]
+[ApiVersionNeutral]
 [AllowAnonymous]
 [Route("health")]
 public sealed class HealthController(HealthCheckService healthCheckService) : ControllerBase
