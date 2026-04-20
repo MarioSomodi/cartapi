@@ -3,6 +3,12 @@
     <Project Path="tests/Cart.Domain.Tests/Cart.Domain.Tests.csproj" />
     <Project Path="tests/Cart.IntegrationTests/Cart.IntegrationTests.csproj" />
   </Folder>
+  <Folder Name="/docs/">
+    <File Path="docs/architecture.md" />
+    <File Path="docs/system-context.svg" />
+    <File Path="docs/cart-update-flow.svg" />
+    <File Path="docs/cart-component.svg" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".dockerignore" />
     <File Path=".github/workflows/ci.yml" />

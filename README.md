@@ -10,6 +10,10 @@ The implementation is intentionally narrow but production-minded:
 - JWT bearer authentication with cart ownership scoped by `tenantId + sub`
 - Swagger, API versioning, `ProblemDetails`, health checks, correlation IDs, ECS-style structured logging, and OpenTelemetry tracing
 
+## Architecture Document
+
+- [Architecture and Implementation Strategy](docs/architecture.md)
+
 ## Solution Structure
 
 ```text
