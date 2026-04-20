@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Cart.IntegrationTests.Shared;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Shouldly;
@@ -9,10 +10,12 @@ namespace Cart.IntegrationTests.Carts;
 
 public sealed class CartControllerTests : IClassFixture<WebApplicationFactory<Program>>
 {
+    private readonly WebApplicationFactory<Program> factory;
     private readonly HttpClient client;
 
     public CartControllerTests(WebApplicationFactory<Program> factory)
     {
+        this.factory = factory;
         client = factory
             .WithWebHostBuilder(builder => builder.UseEnvironment("Test"))
             .CreateClient();
@@ -43,17 +46,20 @@ public sealed class CartControllerTests : IClassFixture<WebApplicationFactory<Pr
     [Fact]
     public async Task AddItem_ShouldReturnBadRequest_WhenPayloadIsInvalid()
     {
-        HttpResponseMessage response = await client.PostAsJsonAsync(
-            "/api/v1/cart/items",
-            new
-            {
-                sku = string.Empty,
-                name = string.Empty,
-                quantity = 0,
-                unitPrice = -1m,
-                currency = "EU"
-            },
-            TestContext.Current.CancellationToken);
+        using WebApplicationFactory<Program> authenticatedFactory = factory.WithTestAuthenticationAndInMemoryCart();
+        using HttpClient authenticatedClient = authenticatedFactory.CreateAuthenticatedClient();
+
+        HttpResponseMessage response = await authenticatedClient.PostAsJsonAsync(
+                "/api/v1/cart/items",
+                new
+                {
+                    sku = string.Empty,
+                    name = string.Empty,
+                    quantity = 0,
+                    unitPrice = -1m,
+                    currency = "EU"
+                },
+                TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
@@ -64,9 +70,12 @@ public sealed class CartControllerTests : IClassFixture<WebApplicationFactory<Pr
     [Fact]
     public async Task RemoveItem_ShouldReturnBadRequest_WhenItemIdIsEmpty()
     {
-        HttpResponseMessage response = await client.DeleteAsync(
-            $"/api/v1/cart/items/{Guid.Empty}",
-            TestContext.Current.CancellationToken);
+        using WebApplicationFactory<Program> authenticatedFactory = factory.WithTestAuthenticationAndInMemoryCart();
+        using HttpClient authenticatedClient = authenticatedFactory.CreateAuthenticatedClient();
+
+        HttpResponseMessage response = await authenticatedClient.DeleteAsync(
+                $"/api/v1/cart/items/{Guid.Empty}",
+                TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 

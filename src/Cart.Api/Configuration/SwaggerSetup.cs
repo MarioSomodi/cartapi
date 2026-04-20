@@ -43,6 +43,8 @@ internal sealed class ConfigureSwaggerOptions(IApiVersionDescriptionProvider pro
 {
     public void Configure(SwaggerGenOptions options)
     {
+        AddSecurity(options);
+
         if (provider.ApiVersionDescriptions.Count == 0)
         {
             options.SwaggerDoc("v1", CreateVersionInfo("v1", false));
@@ -70,5 +72,24 @@ internal sealed class ConfigureSwaggerOptions(IApiVersionDescriptionProvider pro
         }
 
         return info;
+    }
+
+    private static void AddSecurity(SwaggerGenOptions options)
+    {
+        OpenApiSecurityScheme scheme = new()
+        {
+            Name = "Authorization",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            Description = "Paste a JWT created with dotnet user-jwts."
+        };
+
+        options.AddSecurityDefinition("Bearer", scheme);
+        options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+        {
+            [new OpenApiSecuritySchemeReference("Bearer", document, null)] = []
+        });
     }
 }

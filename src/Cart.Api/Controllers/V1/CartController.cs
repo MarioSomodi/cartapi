@@ -9,11 +9,13 @@ using Cart.Application.Carts.Shared;
 using Cart.Application.Carts.UpdateCartItemQuantity;
 using Cart.Application.Shared;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cart.Api.Controllers.V1;
 
 [ApiController]
+[Authorize]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/cart")]
 public sealed class CartController(IMediator mediator) : ControllerBase
