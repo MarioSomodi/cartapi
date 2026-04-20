@@ -1,6 +1,7 @@
 using Cart.Api.Configuration;
 using Cart.Api.Middleware;
 using Cart.Api.Security;
+using Cart.Application;
 using Cart.Application.Abstractions.Auth;
 using Cart.Persistence;
 
@@ -10,7 +11,7 @@ builder.Services.AddProblemDetailsSupport();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddControllers();
 builder.Services.AddApiVersioningSupport();
-builder.Services.AddApplicationLayer();
+builder.Services.AddApplication();
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IRequestContext, HttpRequestContext>();

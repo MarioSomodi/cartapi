@@ -21,11 +21,6 @@ public sealed class AddCartItemCommandHandler(
 {
     public async Task<Result<CartDto>> Handle(AddCartItemCommand request, CancellationToken cancellationToken)
     {
-        if (request.Quantity <= 0)
-        {
-            return Result<CartDto>.Failure(ApplicationErrors.Carts.InvalidQuantity);
-        }
-
         Result<RequestIdentity> identityResult = requestContext.GetRequiredIdentity();
         if (identityResult.IsFailure)
         {

@@ -20,6 +20,18 @@ public static class ApplicationErrors
             new("concurrency.conflict", "The resource was modified by another request. Refresh and try again.");
     }
 
+    public static class Validation
+    {
+        public static Error Failed(string description)
+        {
+            string message = string.IsNullOrWhiteSpace(description)
+                ? "One or more validation errors occurred."
+                : description;
+
+            return new Error("validation.failed", message);
+        }
+    }
+
     public static class Carts
     {
         public static readonly Error CartNotFound =
@@ -27,8 +39,5 @@ public static class ApplicationErrors
 
         public static readonly Error ItemNotFound =
             new("carts.item_not_found", "The requested cart item was not found.");
-
-        public static readonly Error InvalidQuantity =
-            new("carts.invalid_quantity", "Quantity must be positive.");
     }
 }
