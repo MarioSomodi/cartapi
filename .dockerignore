@@ -1,0 +1,10 @@
+.git
+.github
+.vs
+bin
+obj
+**/bin
+**/obj
+TestResults
+coverage
+build*.log
