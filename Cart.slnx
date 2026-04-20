@@ -3,6 +3,15 @@
   <Project Path="src/Cart.Application/Cart.Application.csproj" />
   <Project Path="src/Cart.Domain/Cart.Domain.csproj" />
   <Project Path="src/Cart.Persistence/Cart.Persistence.csproj" />
-  <Project Path="tests/Cart.Domain.Tests/Cart.Domain.Tests.csproj" />
-  <Project Path="tests/Cart.IntegrationTests/Cart.IntegrationTests.csproj" />
+  <Folder Name="/tests/">
+    <Project Path="tests/Cart.Domain.Tests/Cart.Domain.Tests.csproj" />
+    <Project Path="tests/Cart.IntegrationTests/Cart.IntegrationTests.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+  </Folder>
 </Solution>
