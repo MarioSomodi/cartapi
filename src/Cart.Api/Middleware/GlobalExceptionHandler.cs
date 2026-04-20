@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Cart.Application.Shared;
 
 namespace Cart.Api.Middleware;
 
@@ -28,6 +29,13 @@ public sealed class GlobalExceptionHandler(
             Type = $"https://httpstatuses.com/{statusCode}",
             Instance = httpContext.Request.Path
         };
+
+        if (exception is DbUpdateConcurrencyException)
+        {
+            problemDetails.Extensions["code"] = ApplicationErrors.Concurrency.Conflict.Code;
+        }
+
+        httpContext.Response.StatusCode = statusCode;
 
         return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
         {

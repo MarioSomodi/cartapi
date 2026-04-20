@@ -14,24 +14,21 @@ internal static class TestApiFactoryExtensions
 {
     public static WebApplicationFactory<Program> WithTestAuthenticationAndInMemoryCart(this WebApplicationFactory<Program> factory)
     {
-        return factory.WithWebHostBuilder(builder =>
+        return factory.WithTestAuthentication(services =>
         {
-            builder.UseEnvironment("Test");
-            builder.ConfigureTestServices(services =>
-            {
-                services.RemoveAll<ICartRepository>();
-                services.RemoveAll<IUnitOfWork>();
+            services.AddSingleton<InMemoryCartStore>();
+            services.AddScoped<ICartRepository>(serviceProvider => serviceProvider.GetRequiredService<InMemoryCartStore>());
+            services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<InMemoryCartStore>());
+        });
+    }
 
-                services.AddSingleton<InMemoryCartStore>();
-                services.AddScoped<ICartRepository>(serviceProvider => serviceProvider.GetRequiredService<InMemoryCartStore>());
-                services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<InMemoryCartStore>());
-
-                services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = TestAuthenticationDefaults.Scheme;
-                    options.DefaultChallengeScheme = TestAuthenticationDefaults.Scheme;
-                }).AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>(TestAuthenticationDefaults.Scheme, _ => { });
-            });
+    public static WebApplicationFactory<Program> WithTestAuthenticationAndConcurrencyConflict(this WebApplicationFactory<Program> factory)
+    {
+        return factory.WithTestAuthentication(services =>
+        {
+            services.AddSingleton<InMemoryCartStore>();
+            services.AddScoped<ICartRepository>(serviceProvider => serviceProvider.GetRequiredService<InMemoryCartStore>());
+            services.AddScoped<IUnitOfWork, ConflictOnSaveUnitOfWork>();
         });
     }
 
@@ -54,5 +51,28 @@ internal static class TestApiFactoryExtensions
         }
 
         return client;
+    }
+
+    private static WebApplicationFactory<Program> WithTestAuthentication(
+        this WebApplicationFactory<Program> factory,
+        Action<IServiceCollection> configureServices)
+    {
+        return factory.WithWebHostBuilder(builder =>
+        {
+            builder.UseEnvironment("Test");
+            builder.ConfigureTestServices(services =>
+            {
+                services.RemoveAll<ICartRepository>();
+                services.RemoveAll<IUnitOfWork>();
+
+                configureServices(services);
+
+                services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = TestAuthenticationDefaults.Scheme;
+                    options.DefaultChallengeScheme = TestAuthenticationDefaults.Scheme;
+                }).AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>(TestAuthenticationDefaults.Scheme, _ => { });
+            });
+        });
     }
 }
