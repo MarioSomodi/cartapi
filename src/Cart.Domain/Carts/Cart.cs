@@ -4,6 +4,10 @@ public sealed class Cart
 {
     private readonly List<CartItem> items = [];
 
+    private Cart()
+    {
+    }
+
     private Cart(string tenantId, string subjectId)
     {
         Id = Guid.NewGuid();
@@ -15,15 +19,15 @@ public sealed class Cart
         Version = 1;
     }
 
-    public Guid Id { get; }
+    public Guid Id { get; private set; }
 
-    public string TenantId { get; }
+    public string TenantId { get; private set; } = string.Empty;
 
-    public string SubjectId { get; }
+    public string SubjectId { get; private set; } = string.Empty;
 
-    public CartStatus Status { get; }
+    public CartStatus Status { get; private set; }
 
-    public DateTime CreatedAtUtc { get; }
+    public DateTime CreatedAtUtc { get; private set; }
 
     public DateTime UpdatedAtUtc { get; private set; }
 

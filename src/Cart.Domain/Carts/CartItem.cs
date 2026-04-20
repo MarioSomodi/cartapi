@@ -2,6 +2,10 @@ namespace Cart.Domain.Carts;
 
 public sealed class CartItem
 {
+    private CartItem()
+    {
+    }
+
     internal CartItem(Guid cartId, string sku, string name, int quantity, decimal unitPrice, string currency)
     {
         Id = Guid.NewGuid();
@@ -13,19 +17,19 @@ public sealed class CartItem
         Currency = NormalizeCurrency(currency);
     }
 
-    public Guid Id { get; }
+    public Guid Id { get; private set; }
 
-    public Guid CartId { get; }
+    public Guid CartId { get; private set; }
 
-    public string Sku { get; }
+    public string Sku { get; private set; } = string.Empty;
 
-    public string Name { get; private set; }
+    public string Name { get; private set; } = string.Empty;
 
     public int Quantity { get; private set; }
 
     public decimal UnitPrice { get; private set; }
 
-    public string Currency { get; private set; }
+    public string Currency { get; private set; } = string.Empty;
 
     public void IncreaseQuantity(int quantity)
     {
