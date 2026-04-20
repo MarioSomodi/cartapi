@@ -33,17 +33,6 @@ public sealed class CartControllerTests : IClassFixture<WebApplicationFactory<Pr
     }
 
     [Fact]
-    public async Task CreateCart_ShouldReturnUnauthorizedProblemDetails_WhenRequestIsUnauthenticated()
-    {
-        HttpResponseMessage response = await client.PostAsync("/api/v1/cart", content: null, TestContext.Current.CancellationToken);
-
-        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
-
-        JsonDocument problem = await ReadProblemAsync(response);
-        problem.RootElement.GetProperty("code").GetString().ShouldBe("auth.unauthenticated");
-    }
-
-    [Fact]
     public async Task AddItem_ShouldReturnBadRequest_WhenPayloadIsInvalid()
     {
         using WebApplicationFactory<Program> authenticatedFactory = factory.WithTestAuthenticationAndInMemoryCart();

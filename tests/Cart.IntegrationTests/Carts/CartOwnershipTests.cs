@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Json;
 using System.Text.Json;
 using Cart.IntegrationTests.Shared;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -26,7 +25,7 @@ public sealed class CartOwnershipTests : IClassFixture<WebApplicationFactory<Pro
 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
 
-        JsonDocument problem = await ReadProblemAsync(response);
+        using JsonDocument problem = await response.ReadProblemAsync();
         problem.RootElement.GetProperty("code").GetString().ShouldBe("auth.missing_subject_id");
     }
 
@@ -40,7 +39,7 @@ public sealed class CartOwnershipTests : IClassFixture<WebApplicationFactory<Pro
 
         response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
 
-        JsonDocument problem = await ReadProblemAsync(response);
+        using JsonDocument problem = await response.ReadProblemAsync();
         problem.RootElement.GetProperty("code").GetString().ShouldBe("auth.missing_tenant_id");
     }
 
@@ -51,14 +50,13 @@ public sealed class CartOwnershipTests : IClassFixture<WebApplicationFactory<Pro
         using HttpClient ownerClient = authenticatedFactory.CreateAuthenticatedClient(subjectId: "subject-1", tenantId: "tenant-1");
         using HttpClient otherClient = authenticatedFactory.CreateAuthenticatedClient(subjectId: "subject-2", tenantId: "tenant-1");
 
-        HttpResponseMessage createResponse = await ownerClient.PostAsync("/api/v1/cart", content: null, TestContext.Current.CancellationToken);
-        createResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        await ownerClient.CreateCartAsync();
 
         HttpResponseMessage response = await otherClient.GetAsync("/api/v1/cart", TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
 
-        JsonDocument problem = await ReadProblemAsync(response);
+        using JsonDocument problem = await response.ReadProblemAsync();
         problem.RootElement.GetProperty("code").GetString().ShouldBe("carts.not_found");
     }
 
@@ -69,49 +67,30 @@ public sealed class CartOwnershipTests : IClassFixture<WebApplicationFactory<Pro
         using HttpClient ownerClient = authenticatedFactory.CreateAuthenticatedClient(subjectId: "subject-1", tenantId: "tenant-1");
         using HttpClient otherClient = authenticatedFactory.CreateAuthenticatedClient(subjectId: "subject-1", tenantId: "tenant-2");
 
-        HttpResponseMessage createResponse = await ownerClient.PostAsync("/api/v1/cart", content: null, TestContext.Current.CancellationToken);
-        createResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        await ownerClient.CreateCartAsync();
 
         HttpResponseMessage response = await otherClient.GetAsync("/api/v1/cart", TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
 
-        JsonDocument problem = await ReadProblemAsync(response);
+        using JsonDocument problem = await response.ReadProblemAsync();
         problem.RootElement.GetProperty("code").GetString().ShouldBe("carts.not_found");
     }
 
     [Fact]
-    public async Task CartEndpoints_ShouldReturnOwnerCart_ForMatchingAuthenticatedIdentity()
+    public async Task GetCart_ShouldReturnCart_ForOwningIdentity()
     {
         using WebApplicationFactory<Program> authenticatedFactory = factory.WithTestAuthenticationAndInMemoryCart();
         using HttpClient client = authenticatedFactory.CreateAuthenticatedClient(subjectId: "subject-1", tenantId: "tenant-1");
 
-        HttpResponseMessage addItemResponse = await client.PostAsJsonAsync(
-            "/api/v1/cart/items",
-            new
-            {
-                sku = "SKU-1",
-                name = "Keyboard",
-                quantity = 2,
-                unitPrice = 50m,
-                currency = "EUR"
-            },
-            TestContext.Current.CancellationToken);
-
-        addItemResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var addItemCart = await client.AddItemAsync("SKU-1", "Keyboard", 2, 50m, "EUR");
 
         HttpResponseMessage getCartResponse = await client.GetAsync("/api/v1/cart", TestContext.Current.CancellationToken);
-        getCartResponse.StatusCode.ShouldBe(HttpStatusCode.OK);
+        var cart = await getCartResponse.ReadCartAsync();
 
-        JsonDocument payload = await ReadProblemAsync(getCartResponse);
-        payload.RootElement.GetProperty("tenantId").GetString().ShouldBe("tenant-1");
-        payload.RootElement.GetProperty("subjectId").GetString().ShouldBe("subject-1");
-        payload.RootElement.GetProperty("items").GetArrayLength().ShouldBe(1);
-    }
-
-    private static async Task<JsonDocument> ReadProblemAsync(HttpResponseMessage response)
-    {
-        Stream content = await response.Content.ReadAsStreamAsync(TestContext.Current.CancellationToken);
-        return await JsonDocument.ParseAsync(content, cancellationToken: TestContext.Current.CancellationToken);
+        cart.Id.ShouldBe(addItemCart.Id);
+        cart.TenantId.ShouldBe("tenant-1");
+        cart.SubjectId.ShouldBe("subject-1");
+        cart.Items.Count.ShouldBe(1);
     }
 }

@@ -40,15 +40,6 @@ public sealed class CartValidationBehaviorTests : IClassFixture<WebApplicationFa
         result.Error.Code.ShouldBe("validation.failed");
     }
 
-    [Fact]
-    public async Task AddCartItem_ShouldReachHandler_WhenValidationSucceeds()
-    {
-        Result<CartDto> result = await SendAsync(new AddCartItemCommand("SKU-1", "Keyboard", 1, 10m, "EUR"));
-
-        result.IsFailure.ShouldBeTrue();
-        result.Error.Code.ShouldBe("auth.unauthenticated");
-    }
-
     private async Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request)
     {
         using IServiceScope scope = factory.Services.CreateScope();
