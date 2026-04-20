@@ -22,4 +22,24 @@ public sealed class CartTests
         item.Currency.ShouldBe("EUR");
         cart.TotalAmount.ShouldBe(30m);
     }
+
+    [Fact]
+    public void AddItem_ShouldRejectMergedSku_WhenUnitPriceChanges()
+    {
+        DomainCart cart = DomainCart.Create("tenant-1", "subject-1");
+        cart.AddItem("SKU-1", "Keyboard", 1, 10m, "EUR");
+
+        Should.Throw<CartItemSnapshotMismatchException>(() =>
+            cart.AddItem("SKU-1", "Keyboard", 1, 12m, "EUR"));
+    }
+
+    [Fact]
+    public void AddItem_ShouldRejectMergedSku_WhenCurrencyChanges()
+    {
+        DomainCart cart = DomainCart.Create("tenant-1", "subject-1");
+        cart.AddItem("SKU-1", "Keyboard", 1, 10m, "EUR");
+
+        Should.Throw<CartItemSnapshotMismatchException>(() =>
+            cart.AddItem("SKU-1", "Keyboard", 1, 10m, "USD"));
+    }
 }

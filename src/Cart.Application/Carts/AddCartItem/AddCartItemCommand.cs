@@ -3,6 +3,7 @@ using Cart.Application.Abstractions.Persistence;
 using Cart.Application.Carts.Abstractions;
 using Cart.Application.Carts.Shared;
 using Cart.Application.Shared;
+using Cart.Domain.Carts;
 using MediatR;
 
 namespace Cart.Application.Carts.AddCartItem;
@@ -36,7 +37,15 @@ public sealed class AddCartItemCommandHandler(
             await cartRepository.AddAsync(cart, cancellationToken);
         }
 
-        cart.AddItem(request.Sku, request.Name, request.Quantity, request.UnitPrice, request.Currency);
+        try
+        {
+            cart.AddItem(request.Sku, request.Name, request.Quantity, request.UnitPrice, request.Currency);
+        }
+        catch (CartItemSnapshotMismatchException)
+        {
+            return Result<CartDto>.Failure(ApplicationErrors.Carts.ItemSnapshotMismatch);
+        }
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<CartDto>.Success(cart.ToDto());

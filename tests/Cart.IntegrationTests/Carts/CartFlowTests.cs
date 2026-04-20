@@ -111,4 +111,30 @@ public sealed class CartFlowTests : IClassFixture<WebApplicationFactory<Program>
         cart.Items.ShouldBeEmpty();
         cart.TotalAmount.ShouldBe(0m);
     }
+
+    [Fact]
+    public async Task AddItem_ShouldReturnConflict_WhenSameSkuHasDifferentPriceSnapshot()
+    {
+        using WebApplicationFactory<Program> authenticatedFactory = factory.WithTestAuthenticationAndInMemoryCart();
+        using HttpClient client = authenticatedFactory.CreateAuthenticatedClient(subjectId: "subject-1", tenantId: "tenant-1");
+
+        await client.AddItemAsync("SKU-1", "Keyboard", 1, 10m, "EUR");
+
+        HttpResponseMessage response = await client.PostAsJsonAsync(
+            "/api/v1/cart/items",
+            new
+            {
+                sku = "SKU-1",
+                name = "Keyboard",
+                quantity = 1,
+                unitPrice = 12m,
+                currency = "EUR"
+            },
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(HttpStatusCode.Conflict);
+
+        using JsonDocument problem = await response.ReadProblemAsync();
+        problem.RootElement.GetProperty("code").GetString().ShouldBe("carts.item_snapshot_mismatch");
+    }
 }

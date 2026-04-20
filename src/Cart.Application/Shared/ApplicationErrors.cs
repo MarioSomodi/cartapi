@@ -39,5 +39,8 @@ public static class ApplicationErrors
 
         public static readonly Error ItemNotFound =
             new("carts.item_not_found", "The requested cart item was not found.");
+
+        public static readonly Error ItemSnapshotMismatch =
+            new("carts.item_snapshot_mismatch", "The cart already contains this SKU with a different unit price or currency.");
     }
 }

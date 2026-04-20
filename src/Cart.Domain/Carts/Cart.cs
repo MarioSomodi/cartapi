@@ -50,6 +50,11 @@ public sealed class Cart
 
         if (existingItem is not null)
         {
+            if (!existingItem.HasMatchingSnapshot(unitPrice, currency))
+            {
+                throw new CartItemSnapshotMismatchException(existingItem.Sku);
+            }
+
             existingItem.IncreaseQuantity(quantity);
             existingItem.RefreshDisplayName(name);
             Touch();

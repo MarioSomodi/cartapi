@@ -41,6 +41,15 @@ public sealed class CartItem
         Quantity = ValidateQuantity(quantity);
     }
 
+    internal bool HasMatchingSnapshot(decimal unitPrice, string currency)
+    {
+        decimal normalizedUnitPrice = ValidateUnitPrice(unitPrice);
+        string normalizedCurrency = NormalizeCurrency(currency);
+
+        return UnitPrice == normalizedUnitPrice
+            && string.Equals(Currency, normalizedCurrency, StringComparison.Ordinal);
+    }
+
     public decimal GetLineTotal() => Quantity * UnitPrice;
 
     internal void RefreshDisplayName(string name)
