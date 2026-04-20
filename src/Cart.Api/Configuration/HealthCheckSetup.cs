@@ -8,8 +8,7 @@ public static class HealthCheckSetup
     {
         services
             .AddHealthChecks()
-            .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"])
-            .AddCheck("startup", () => HealthCheckResult.Healthy(), tags: ["ready"]);
+            .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"]);
 
         return services;
     }
